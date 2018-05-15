@@ -1,0 +1,8 @@
+
+.system-status-icon.uefi-logo {
+    background-image: url('icons/uefi-logo.png');
+    background-size: contain;
+    height: 100%;
+    width: 4px;
+    opacity: 0.5;
+}
