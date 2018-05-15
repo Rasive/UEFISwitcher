@@ -18,6 +18,9 @@ const Lang = imports.lang;
 const Gio = imports.gi.Gio;
 const Shell = imports.gi.Shell;
 const PanelMenu = imports.ui.panelMenu;
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+
+const Utils = Extension.imports.utils;
 
 var CustomButton = new Lang.Class({
     Name: "Button",
@@ -30,8 +33,9 @@ var CustomButton = new Lang.Class({
         this.box = new St.BoxLayout({
             vertical: false,
             style_class: "panel-status-menu-box"
-        });;
-        this.actor.add_child(this.box);
+        });
+        this._actor = this.actor;
+        this._actor.add_child(this.box);
     },
     _openApp: function (app) {
         Shell.AppSystem.get_default().lookup_app(app).activate();
@@ -45,10 +49,10 @@ var CustomButton = new Lang.Class({
         if (spacing < 6) {
             style += '; -minimum-hpadding: %dpx'.format(spacing);
         }
-        this.actor.set_style(style);
+        this._actor.set_style(style);
     },
     calculate_spacing: function () {
-        let style = this.actor.get_style();
+        let style = this._actor.get_style();
         if (style) {
             let start = style.indexOf("-natural-hpadding: ");
             let end = style.indexOf("px;");
