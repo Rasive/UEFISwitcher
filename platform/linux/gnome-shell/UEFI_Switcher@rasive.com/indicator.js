@@ -4,11 +4,13 @@ const Gtk = imports.gi.Gtk;
 const Main = imports.ui.main;
 const Clutter = imports.gi.Clutter;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
+
 const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 
 const CustomButton = Extension.imports.button.CustomButton;
 
-const Utils = Extension.imports.utils;
+const Log = Extension.imports.logger;
 
 var UEFIIndicator = new Lang.Class({
     Name: "UEFIIndicator",
@@ -25,39 +27,30 @@ var UEFIIndicator = new Lang.Class({
             style_class: "system-status-icon"
         });
 
+        if(typeof this._uefiApps == "undefined") {
+            this._uefiApps = [];
+        }
+
         this.box.add_child(this.actor);
 
-
-        this._messageList = Main.panel.statusArea.dateMenu._messageList;
-        this._vbox = new St.BoxLayout({
-            height: 400,
-            style: "border:1px;"
-        });
-    
-        this._vbox.add(this._messageList.actor);
-
-        this.menu.box.add(this._vbox);
-
-        try {
-            this._messageList._removeSection(this._messageList._mediaSection);
-        } catch (e) {}
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Testing..."));
 
         this.menu.connect("open-state-changed", (menu, isOpen) => {
             if (isOpen) {
-                let now = new Date();
-                this._messageList.setDate(now);
             }
         });
+      },
 
-        this._closeButton = this._messageList._clearButton;
-        this._hideIndicator = this._closeButton.connect("notify::visible", (obj) => {
-            if (this._autoHide) {
-                if (obj.visible) {
-                    this.actor.show();
-                } else {
-                    this.actor.hide();
-                }
-            }
-        });
+      setUefiApps: function(apps) {
+          this._uefiApps = apps;
+          this._sync();
+      },
+
+      _sync: function() {
+          this.menu.removeAll();
+
+          this._uefiApps.forEach(apps => {
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem("UEFI App"));
+          });
       }
 });
