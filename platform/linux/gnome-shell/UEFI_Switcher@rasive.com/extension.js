@@ -18,12 +18,13 @@ let indicator;
 const _numPattern = /^[0-9]+$/;
 
 const _variablePattern = /^([a-z0-9]+): (.+)/i;
-let _variables = [];
+let _variables = {};
 
-const _bootEntriesPattern = /([a-z0-9]+\*) (.+)/i;
-let _bootEntries = [];
+const _bootEntriesPattern = /[a-z]([0-9]+)\* (.+)/i;
+let _bootEntries = {};
 
 function init() {
+    Log.setLevel(Log.DEBUG);
     Log.debug("Main", "initialized");
 }
 
@@ -74,30 +75,31 @@ function enable() {
 function ready() {
     Log.debug("Main", "Variables:", self._variables);
     Log.debug("Main", "Boot entries:", self._bootEntries);
+
+
 }
 
 function _parseEfibootmgrOutput(line) {
-    Log.debug("Test", "Reading: " + line);
-    // let variableMatches = self._variablePattern.exec(line);
-    // let bootEntriesMatches = self._bootEntriesPattern.exec(line);
+    let variableMatches = self._variablePattern.exec(line);
+    let bootEntriesMatches = self._bootEntriesPattern.exec(line);
 
-    // if (variableMatches != null && variableMatches.length == 2) {
-    //     let key = variableMatches[0];
-    //     let value = variableMatches[1];
+    if (variableMatches != null && variableMatches.length > 2) {
+        let key = variableMatches[1];
+        let value = variableMatches[2];
 
-    //     self.storeVariable(key, value);
-    // }
+        self.storeVariable(key, value);
+    }
 
-    // if (bootEntriesMatches != null && bootEntriesMatches.length == 2) {
-    //     let order = parseInt(bootEntriesMatches[0]);
-    //     let value = bootEntriesMatches[1];
+    if (bootEntriesMatches != null && bootEntriesMatches.length > 2) {
+        let order = parseInt(bootEntriesMatches[1]);
+        let value = bootEntriesMatches[2];
 
-    //     self.storeBootEntry(order, value);
-    // }
+        self.storeBootEntry(order, value);
+    }
 }
 
 function storeBootEntry(order, value) {
-    if (typeof order != "number")
+    if (typeof order != "number" || order == "NaN")
         return;
 
     self._bootEntries[order] = value;
