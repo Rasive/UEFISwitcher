@@ -63,8 +63,6 @@ function enable() {
     };
     // --
 
-    indicator.setUefiApps(["One", "Two", "Three"])
-
     Main.panel.addToStatusArea(indicator.name, indicator, "right");
 
     changeSpacing();
@@ -76,7 +74,7 @@ function ready() {
     Log.debug("Main", "Variables:", self._variables);
     Log.debug("Main", "Boot entries:", self._bootEntries);
 
-
+    indicator.setUefiApps(self.getBootEntries());
 }
 
 function _parseEfibootmgrOutput(line) {
