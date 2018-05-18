@@ -48,7 +48,7 @@ function _arrayToString(array) {
     for (let i = 0; i < array.length; i++) {
         const element = array[i];
 
-        if (Array.isArray(arg)) {
+        if (Array.isArray(array)) {
             str += self._arrayToString(element);
         } else if (typeof element == "object") {
             str += self._objToString(element);
@@ -67,7 +67,7 @@ function _arrayToString(array) {
 }
 
 function _objToString(obj) {
-    if (typeof obj != "object")
+    if (typeof obj != "object" || obj == null)
         return obj;
 
     let keys = Object.keys(obj);
