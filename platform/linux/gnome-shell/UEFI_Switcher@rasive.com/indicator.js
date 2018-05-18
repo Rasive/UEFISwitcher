@@ -15,7 +15,7 @@ const Log = Extension.imports.logger;
 var UEFIIndicator = new Lang.Class({
     Name: "UEFIIndicator",
     Extends: CustomButton,
-    
+
     _init: function () {
         this.parent("UEFI Indicator");
         this.menu.actor.add_style_class_name("aggregate-menu");
@@ -27,7 +27,7 @@ var UEFIIndicator = new Lang.Class({
             style_class: "system-status-icon"
         });
 
-        if(typeof this._uefiApps == "undefined") {
+        if (typeof this._uefiApps == "undefined") {
             this._uefiApps = [];
         }
 
@@ -39,18 +39,40 @@ var UEFIIndicator = new Lang.Class({
             if (isOpen) {
             }
         });
-      },
+    },
 
-      setUefiApps: function(apps) {
-          this._uefiApps = apps;
-          this._sync();
-      },
+    setUefiApps: function (apps) {
+        this._uefiApps = apps;
+        this._sync();
+    },
 
-      _sync: function() {
-          this.menu.removeAll();
+    _buildBootMenuEntries: function () {
+        if (typeof this._uefiApps == "undefined" || this._uefiApps == null)
+            return;
 
-          this._uefiApps.forEach(apps => {
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem("UEFI App"));
-          });
-      }
+        let keys = Object.keys(this._uefiApps);
+
+        if (keys.length == 0) {
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem("No entries found"));
+            return;
+        }
+
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (!this._uefiApps.hasOwnProperty(key))
+                continue;
+
+            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(this._uefiApps[key]));
+        }
+    },
+
+    _buildBootMenuSettings: function() {
+
+    },
+
+    _sync: function () {
+        this.menu.removeAll();
+        this._buildBootMenuEntries();
+        this._buildBootMenuSettings();
+    }
 });
