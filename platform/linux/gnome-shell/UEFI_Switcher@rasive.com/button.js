@@ -20,7 +20,7 @@ const Shell = imports.gi.Shell;
 const PanelMenu = imports.ui.panelMenu;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 
-const Utils = Extension.imports.utils;
+const Log = Extension.imports.logger;
 
 var CustomButton = new Lang.Class({
     Name: "Button",
