@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<schemalist>
+
+  <schema path="/org/gnome/shell/extensions/com/rasive/uefi-switcher/" id="org.gnome.shell.extensions.com.rasive.uefi-switcher">
+
+    <key name="reboot-on-select" type="b">
+      <default>true</default>
+      <summary>Reboot upon selection of next boot application</summary>
+      <description>
+        If enabled, next boot variable will be set, and the pc will reboot when you select the boot application.
+        If disabled, next boot variable will be set, but you will have to reboot the pc manually.
+      </description>
+    </key>
+
+  </schema>
+
+</schemalist>
