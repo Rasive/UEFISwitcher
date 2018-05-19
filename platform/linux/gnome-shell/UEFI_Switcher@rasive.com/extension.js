@@ -29,9 +29,34 @@ function init() {
 }
 
 function enable() {
-    if (typeof indicator == 'undefined') {
+    if (typeof indicator == "undefined") {
         indicator = new UEFIIndicator();
     }
+
+    if(typeof lastSync == "undefined") {
+        lastSync = 0;
+    }
+    
+    if(typeof settings == "undefined") {
+        settings = {};
+    }
+
+    self._sync();
+
+    Main.panel.addToStatusArea(indicator.name, indicator, "right");
+
+    changeSpacing();
+
+    Log.debug("Main", "enable() was called");
+}
+
+function _sync() {
+    let now = new Date().getTime(); 
+
+    if(now - self.lastSync < 5000)
+        return;
+
+    self.lastSync = now;
 
     // GLib native calls
     let out_reader = null;
@@ -62,12 +87,6 @@ function enable() {
         }
     };
     // --
-
-    Main.panel.addToStatusArea(indicator.name, indicator, "right");
-
-    changeSpacing();
-
-    Log.debug("Main", "enable() was called");
 }
 
 function ready() {
@@ -75,6 +94,10 @@ function ready() {
     Log.debug("Main", "Boot entries:", self._bootEntries);
 
     indicator.setUefiApps(self.getBootEntries());
+
+    if(typeof self._variables["BootNext"] != "undefined") {
+        indicator.setChosenUefiApp(self._variables["BootNext"]);
+    }
 }
 
 function _parseEfibootmgrOutput(line) {

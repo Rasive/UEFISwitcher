@@ -16,7 +16,7 @@ var UEFIIndicator = new Lang.Class({
     Name: "UEFIIndicator",
     Extends: CustomButton,
 
-    _init: function () {
+    _init: function (settings) {
         this.parent("UEFI Indicator");
         this.menu.actor.add_style_class_name("aggregate-menu");
 
@@ -27,21 +27,45 @@ var UEFIIndicator = new Lang.Class({
             style_class: "system-status-icon"
         });
 
+        this.settings = settings;
+
+        if(typeof this.lastSync == "undefined") {
+            this.lastSync = 0;
+        }
+
         if (typeof this._uefiApps == "undefined") {
             this._uefiApps = [];
         }
 
+        if(typeof this._chosenUefiApp == "undefined") {
+            this._chosenUefiApp = -1;
+        }
+
         this.box.add_child(this.actor);
 
-        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("Testing..."));
-
         this.menu.connect("open-state-changed", (menu, isOpen) => {
+            Log.debug("Indicator", "open-state-changed");
             if (isOpen) {
+                this._sync();
             }
         });
     },
 
+    setChosenUefiApp: function(index) {
+        if(typeof index == "number" || index == "NaN")
+            return;
+
+        this._chosenUefiApp = index;
+    },
+
+    getChosenUefiApp: function() {
+        return this._chosenUefiApp;
+    },
+
     setUefiApps: function (apps) {
+        if(typeof apps == "undefined")
+            return;
+
         this._uefiApps = apps;
         this._sync();
     },
@@ -62,17 +86,36 @@ var UEFIIndicator = new Lang.Class({
             if (!this._uefiApps.hasOwnProperty(key))
                 continue;
 
-            this.menu.addMenuItem(new PopupMenu.PopupMenuItem(this._uefiApps[key]));
+            let menuItem = new PopupMenu.PopupMenuItem(this._uefiApps[key]);
+
+            if(i == this._chosenUefiApp) {
+                menuItem.setOrnament(PopupMenu.Ornament.DOT);
+            }
+
+            this.menu.addMenuItem(menuItem);
         }
     },
 
-    _buildBootMenuSettings: function() {
+    _buildBootMenuSettings: function () {
+        this.menu.addMenuItem(new PopupMenu.PopupMenuItem("UEFI Switcher Settings"));
+    },
 
+    _buildBootMenuPreMenu: function () {
+        this.menu.addMenuItem(new PopupMenu.PopupSwitchMenuItem("Reboot on Select"));
     },
 
     _sync: function () {
+        let now = new Date().getTime(); 
+
+        if(now - this.lastSync < 1000)
+            return;
+
+        this.lastSync = now;
         this.menu.removeAll();
+        this._buildBootMenuPreMenu();
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem())
         this._buildBootMenuEntries();
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem())
         this._buildBootMenuSettings();
     }
 });
