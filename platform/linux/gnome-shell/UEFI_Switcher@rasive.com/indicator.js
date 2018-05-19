@@ -20,7 +20,7 @@ var UEFIIndicator = new Lang.Class({
         this.parent("UEFI Indicator");
         this.menu.actor.add_style_class_name("aggregate-menu");
 
-        Gtk.IconTheme.get_default().append_search_path(Extension.dir.get_child('icons').get_path());
+        Gtk.IconTheme.get_default().append_search_path(Extension.dir.get_child("icons").get_path());
 
         this.actor = new St.Icon({
             icon_name: "uefi-logo",
@@ -101,7 +101,19 @@ var UEFIIndicator = new Lang.Class({
     },
 
     _buildBootMenuPreMenu: function () {
-        this.menu.addMenuItem(new PopupMenu.PopupSwitchMenuItem("Reboot on Select"));
+        let state = true;
+        let popupSwitchMenuItem = new PopupMenu.PopupSwitchMenuItem("Reboot on Select");
+
+        if(typeof this.settings != "undefined") {
+            state = this.settings.get_boolean("reboot-on-select");
+        }
+
+        popupSwitchMenuItem.setToggleState(state);
+        popupSwitchMenuItem.connect("toggled", (item, state) => {
+            this.settings.set_boolean("reboot-on-select", state);
+        });
+
+        this.menu.addMenuItem(popupSwitchMenuItem);
     },
 
     _sync: function () {

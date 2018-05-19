@@ -6,9 +6,13 @@ const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
+const GioSSS = Gio.SettingsSchemaSource;
+
 const UEFIIndicator = Extension.imports.indicator.UEFIIndicator;
 const CustomButton = Extension.imports.button.CustomButton;
 const Log = Extension.imports.logger;
+
+const SETTINGS_SCHEMA = "org.gnome.shell.extensions.com.rasive.uefi-switcher";
 
 const self = this;
 
@@ -23,22 +27,48 @@ let _variables = {};
 const _bootEntriesPattern = /[a-z]([0-9]+)\* (.+)/i;
 let _bootEntries = {};
 
+
+function getSettings(schema) {
+    // check if this extension was built with "make zip-file", and thus
+    // has the schema files in a subfolder
+    // otherwise assume that extension has been installed in the
+    // same prefix as gnome-shell (and therefore schemas are available
+    // in the standard folders)
+    let schemaDir = Extension.dir.get_child("schemas");
+    let schemaSource;
+    if (schemaDir.query_exists(null))
+        schemaSource = GioSSS.new_from_directory(schemaDir.get_path(),
+            GioSSS.get_default(),
+            false);
+    else
+        schemaSource = GioSSS.get_default();
+
+    let schemaObj = schemaSource.lookup(schema, true);
+    if (!schemaObj)
+        throw new Error("Schema " + schema + " could not be found for extension " +
+            extension.metadata.uuid + ". Please check your installation.");
+
+    return new Gio.Settings({
+        settings_schema: schemaObj
+    });
+}
+
 function init() {
+    settings = getSettings(SETTINGS_SCHEMA);
+
+    settings.connect("changed::reboot-on-select", () => Log.debug("Settings", "reboot-on-select", settings.get_boolean("reboot-on-select")));
+
     Log.setLevel(Log.DEBUG);
     Log.debug("Main", "initialized");
 }
 
 function enable() {
     if (typeof indicator == "undefined") {
-        indicator = new UEFIIndicator();
+        indicator = new UEFIIndicator(settings);
     }
 
     if(typeof lastSync == "undefined") {
         lastSync = 0;
-    }
-    
-    if(typeof settings == "undefined") {
-        settings = {};
     }
 
     self._sync();
