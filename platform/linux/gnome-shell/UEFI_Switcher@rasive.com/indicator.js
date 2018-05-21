@@ -62,7 +62,7 @@ var UEFIIndicator = new Lang.Class({
         Log.debug("Indicator", "ChosenUefiApp set to " + index);
 
         this._chosenUefiApp = index;
-        // this._sync();
+        this._sync();
     },
 
     getChosenUefiApp: function() {
@@ -125,6 +125,9 @@ var UEFIIndicator = new Lang.Class({
         }
 
         popupSwitchMenuItem.setToggleState(state);
+        popupSwitchMenuItem.connect("activate", () => {
+            return true;
+        });
         popupSwitchMenuItem.connect("toggled", (item, state) => {
             this.settings.set_boolean("reboot-on-select", state);
         });
