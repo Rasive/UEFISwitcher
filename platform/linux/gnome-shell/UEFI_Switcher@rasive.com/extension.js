@@ -16,6 +16,7 @@ const SETTINGS_SCHEMA = "org.gnome.shell.extensions.com.rasive.uefi-switcher";
 
 const self = this;
 
+let lastSync;
 let settings;
 let indicator;
 
@@ -65,9 +66,10 @@ function init() {
 function enable() {
     if (typeof indicator == "undefined") {
         indicator = new UEFIIndicator(settings);
+        indicator.setFuncNextBoot(indicator.setChosenUefiApp);
     }
 
-    if(typeof lastSync == "undefined") {
+    if (typeof lastSync == "undefined") {
         lastSync = 0;
     }
 
@@ -81,9 +83,9 @@ function enable() {
 }
 
 function _sync() {
-    let now = new Date().getTime(); 
+    let now = new Date().getTime();
 
-    if(now - self.lastSync < 5000)
+    if (now - self.lastSync < 5000)
         return;
 
     self.lastSync = now;
@@ -125,7 +127,7 @@ function ready() {
 
     indicator.setUefiApps(self.getBootEntries());
 
-    if(typeof self._variables["BootNext"] != "undefined") {
+    if (typeof self._variables["BootNext"] != "undefined") {
         indicator.setChosenUefiApp(self._variables["BootNext"]);
     }
 }
