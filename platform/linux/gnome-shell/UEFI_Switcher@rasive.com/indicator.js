@@ -51,11 +51,18 @@ var UEFIIndicator = new Lang.Class({
         });
     },
 
+    setFuncNextBoot: function(func) {
+        this._func_setNextBoot = func;
+    },
+
     setChosenUefiApp: function(index) {
-        if(typeof index == "number" || index == "NaN")
+        if(typeof index != "number" || index == "NaN")
             return;
 
+        Log.debug("Indicator", "ChosenUefiApp set to " + index);
+
         this._chosenUefiApp = index;
+        // this._sync();
     },
 
     getChosenUefiApp: function() {
@@ -91,6 +98,15 @@ var UEFIIndicator = new Lang.Class({
             if(i == this._chosenUefiApp) {
                 menuItem.setOrnament(PopupMenu.Ornament.DOT);
             }
+
+            menuItem.connect("activate", () => {
+                Log.debug("Indicator", "MenuItem " + i + " was clicked");
+                if(typeof this._func_setNextBoot != "undefined") {
+                    this._func_setNextBoot(i);
+                }
+
+                return false;
+            });
 
             this.menu.addMenuItem(menuItem);
         }
