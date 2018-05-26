@@ -67,6 +67,7 @@ function enable() {
     if (typeof indicator == "undefined") {
         indicator = new UEFIIndicator(settings);
         indicator.setFuncNextBoot(indicator.setChosenUefiApp);
+        indicator.setFuncExtensionSync(self._sync);
     }
 
     if (typeof lastSync == "undefined") {
@@ -88,6 +89,7 @@ function _sync() {
     if (now - self.lastSync < 5000)
         return;
 
+    Log.debug("Main", "Syncing...");
     self.lastSync = now;
 
     // GLib native calls
@@ -128,7 +130,8 @@ function ready() {
     indicator.setUefiApps(self.getBootEntries());
 
     if (typeof self._variables["BootNext"] != "undefined") {
-        indicator.setChosenUefiApp(self._variables["BootNext"]);
+        Log.debug("Main", "BootNext was set, updating indicator...");
+        indicator.setChosenUefiApp(parseInt(self._variables["BootNext"]));
     }
 }
 
