@@ -54,6 +54,12 @@ function getSettings(schema) {
     });
 }
 
+Number.prototype.pad = function(size) {
+    var s = String(this);
+    while (s.length < (size || 2)) {s = "0" + s;}
+    return s;
+}
+
 function init() {
     settings = getSettings(SETTINGS_SCHEMA);
 
@@ -66,7 +72,11 @@ function init() {
 function enable() {
     if (typeof indicator == "undefined") {
         indicator = new UEFIIndicator(settings);
-        indicator.setFuncNextBoot(indicator.setChosenUefiApp);
+        indicator.setFuncNextBoot(index => {
+            GLib.spawn_async_with_pipes(null, ["/bin/efibootmgr", "-n", ], null, 0, null);
+
+            indicator.setChosenUefiApp(index);
+        });
         indicator.setFuncExtensionSync(self._sync);
     }
 
