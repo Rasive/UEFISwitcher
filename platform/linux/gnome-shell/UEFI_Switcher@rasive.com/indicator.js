@@ -29,7 +29,7 @@ var UEFIIndicator = new Lang.Class({
 
         this.settings = settings;
 
-        if(typeof this.lastSync == "undefined") {
+        if (typeof this.lastSync == "undefined") {
             this.lastSync = 0;
         }
 
@@ -37,7 +37,7 @@ var UEFIIndicator = new Lang.Class({
             this._uefiApps = [];
         }
 
-        if(typeof this._chosenUefiApp == "undefined") {
+        if (typeof this._chosenUefiApp == "undefined") {
             this._chosenUefiApp = -1;
         }
 
@@ -51,26 +51,29 @@ var UEFIIndicator = new Lang.Class({
         });
     },
 
-    setFuncNextBoot: function(func) {
+    setFuncExtensionSync: function (func) {
+        this._func_extension_sync = func;
+    },
+
+    setFuncNextBoot: function (func) {
         this._func_setNextBoot = func;
     },
 
-    setChosenUefiApp: function(index) {
-        if(typeof index != "number" || index == "NaN")
+    setChosenUefiApp: function (index) {
+        if (typeof index != "number" || index == "NaN")
             return;
 
         Log.debug("Indicator", "ChosenUefiApp set to " + index);
 
         this._chosenUefiApp = index;
-        this._sync();
     },
 
-    getChosenUefiApp: function() {
+    getChosenUefiApp: function () {
         return this._chosenUefiApp;
     },
 
     setUefiApps: function (apps) {
-        if(typeof apps == "undefined")
+        if (typeof apps == "undefined")
             return;
 
         this._uefiApps = apps;
@@ -95,13 +98,13 @@ var UEFIIndicator = new Lang.Class({
 
             let menuItem = new PopupMenu.PopupMenuItem(this._uefiApps[key]);
 
-            if(i == this._chosenUefiApp) {
+            if (i == this._chosenUefiApp) {
                 menuItem.setOrnament(PopupMenu.Ornament.DOT);
             }
 
             menuItem.connect("activate", () => {
                 Log.debug("Indicator", "MenuItem " + i + " was clicked");
-                if(typeof this._func_setNextBoot != "undefined") {
+                if (typeof this._func_setNextBoot != "undefined") {
                     this._func_setNextBoot(i);
                 }
 
@@ -120,7 +123,7 @@ var UEFIIndicator = new Lang.Class({
         let state = true;
         let popupSwitchMenuItem = new PopupMenu.PopupSwitchMenuItem("Reboot on Select");
 
-        if(typeof this.settings != "undefined") {
+        if (typeof this.settings != "undefined") {
             state = this.settings.get_boolean("reboot-on-select");
         }
 
@@ -136,12 +139,19 @@ var UEFIIndicator = new Lang.Class({
     },
 
     _sync: function () {
-        let now = new Date().getTime(); 
+        let now = new Date().getTime();
 
-        if(now - this.lastSync < 1000)
+        if (now - this.lastSync < 1000)
             return;
 
         this.lastSync = now;
+
+        Log.debug("Indicator", "Syncing...");
+
+        if (typeof this._func_extension_sync != "undefined") {
+            this._func_extension_sync();
+        }
+        
         this.menu.removeAll();
         this._buildBootMenuPreMenu();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem())
