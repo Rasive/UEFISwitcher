@@ -54,9 +54,9 @@ function getSettings(schema) {
     });
 }
 
-Number.prototype.pad = function(size) {
+Number.prototype.pad = function (size) {
     var s = String(this);
-    while (s.length < (size || 2)) {s = "0" + s;}
+    while (s.length < (size || 2)) { s = "0" + s; }
     return s;
 }
 
@@ -73,7 +73,12 @@ function enable() {
     if (typeof indicator == "undefined") {
         indicator = new UEFIIndicator(settings);
         indicator.setFuncNextBoot(index => {
-            GLib.spawn_async_with_pipes(null, ["/bin/efibootmgr", "-n", ], null, 0, null);
+            let paddedNumber = index.pad(4);
+
+            let [_, out, err, stat] = GLib.spawn_command_line_async("sh -c \"pkexec --user root efibootmgr -n " + paddedNumber + "\"; exit;");
+
+            Log.debug("Main", out);
+            Log.debug("Main", err);
 
             indicator.setChosenUefiApp(index);
         });
