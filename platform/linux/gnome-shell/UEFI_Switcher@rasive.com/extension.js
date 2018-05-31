@@ -75,12 +75,10 @@ function enable() {
         indicator.setFuncNextBoot(index => {
             let paddedNumber = index.pad(4);
 
-            let [_, out, err, stat] = GLib.spawn_command_line_async("sh -c \"pkexec --user root efibootmgr -n " + paddedNumber + "\"; exit;");
-
-            Log.debug("Main", out);
-            Log.debug("Main", err);
+            let status = GLib.spawn_command_line_async("sh -c \"pkexec --user root efibootmgr -n " + paddedNumber + "\"; exit;");
 
             indicator.setChosenUefiApp(index);
+            indicator.setFuncExtensionSync(self._sync);
         });
         indicator.setFuncExtensionSync(self._sync);
     }
@@ -101,7 +99,7 @@ function enable() {
 function _sync() {
     let now = new Date().getTime();
 
-    if (now - self.lastSync < 5000)
+    if (now - self.lastSync < 1000)
         return;
 
     Log.debug("Main", "Syncing...");
